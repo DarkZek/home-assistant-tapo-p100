@@ -236,9 +236,6 @@ class TriggerEvent(CoordinatedTapoEntity, EventEntity):
         while True:
             maybe_response = await self.device.get_component(TriggerLogComponent).get_event_logs(10)
             response = maybe_response.get_or_else(TriggerLogResponse(0, 0, []))
-            _LOGGER.info(self._last_event_id)
-            _LOGGER.info(response.events[0].id)
-            _LOGGER.info('d')
 
             if self._last_event_id is None and len(response.events) > 0:
                 # Skip the first event on startup to avoid re-reporting of historical events.
@@ -246,12 +243,9 @@ class TriggerEvent(CoordinatedTapoEntity, EventEntity):
             elif not self._last_event_id is None and self._last_event_id != response.events[0].id:
                 # There's more events to pump. Pump from back to front (oldest to newest)
                 events_len = len(response.events)
-                _LOGGER.info(events_len)
 
                 for i in range(events_len - 1, -1, -1):
-                    _LOGGER.info(f'start looping {i}')
                     event = response.events[i]
-                    _LOGGER.info(type(event))
                     
                     # If already processed, skip
                     if event.id <= self._last_event_id:
@@ -263,13 +257,13 @@ class TriggerEvent(CoordinatedTapoEntity, EventEntity):
                     elif isinstance(event, DoubleClickEvent):
                         self._trigger_event(TriggerEventTypes.DOUBLE_PRESS)
                         _LOGGER.info('double_press')
-                    elif isinstance(event, RotationEvent) and response.events[0].degrees >= 0:
+                    elif isinstance(event, RotationEvent) and event.degrees >= 0:
                         self._trigger_event(TriggerEventTypes.ROTATE_CLOCKWISE)
-                        _LOGGER.info('rotate_clockwise')
+                        _LOGGER.info(f'rotate_clockwise {event.degrees}')
                         # I can access event.degrees here I just don't know how to expose it to HA to use in automations
-                    elif isinstance(event, RotationEvent) and response.events[0].degrees < 0:
+                    elif isinstance(event, RotationEvent) and event.degrees < 0:
                         self._trigger_event(TriggerEventTypes.ROTATE_ANTICLOCKWISE)
-                        _LOGGER.info('rotate_anticlockwise')
+                        _LOGGER.info(f'rotate_anticlockwise {event.degrees}')
                         # I can access event.degrees here I just don't know how to expose it to HA to use in automations
 
                 self.async_write_ha_state()
