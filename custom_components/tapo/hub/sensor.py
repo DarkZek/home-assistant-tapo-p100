@@ -242,9 +242,10 @@ class TriggerEvent(CoordinatedTapoEntity, EventEntity):
                 self._last_event_id = response.events[0].id
             elif not self._last_event_id is None and self._last_event_id != response.events[0].id:
                 # There's more events to pump. Pump from back to front (oldest to newest)
-                events_index = len(response.events)
+                events_len = len(response.events)
+                _LOGGER.info(events_len)
 
-                for i in range(events_index, 0, -1):
+                for i in range(events_len, 0, -1):
                     event = response.events[i]
                     _LOGGER.info('event')
                     _LOGGER.info(i)
