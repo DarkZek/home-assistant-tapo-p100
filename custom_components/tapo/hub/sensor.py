@@ -235,7 +235,6 @@ class TriggerEvent(CoordinatedTapoEntity, EventEntity):
     async def event_loop(self):
         while True:
             maybe_response = await self.device.get_component(TriggerLogComponent).get_event_logs(10)
-            _LOGGER.info(maybe_response)
             response = maybe_response.get_or_else(TriggerLogResponse(0, 0, []))
 
             if self._last_event_id is None and len(response.events) > 0:
