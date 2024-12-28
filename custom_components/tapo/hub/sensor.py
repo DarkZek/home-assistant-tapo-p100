@@ -246,6 +246,9 @@ class TriggerEvent(CoordinatedTapoEntity, EventEntity):
 
                 for i in range(events_index, 0, -1):
                     event = response.events[i]
+                    _LOGGER.info('event')
+                    _LOGGER.info(i)
+                    _LOGGER.info(event)
                     
                     # If already processed, skip
                     if event.id <= self._last_event_id:
