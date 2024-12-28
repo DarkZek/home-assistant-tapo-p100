@@ -233,6 +233,7 @@ class TriggerEvent(CoordinatedTapoEntity, EventEntity):
             # Just request 1 event at a time. This is simple and may result in lost events however.
             # TODO: A better approach may be to cache the last n IDs and try to submit all missing events in order.
             maybe_response = await self.device.get_component(TriggerLogComponent).get_event_logs(1)
+            print(maybe_response)
             response = maybe_response.get_or_else(TriggerLogResponse(0, 0, []))
 
             if self._last_event_id is None and len(response.events) > 0:
