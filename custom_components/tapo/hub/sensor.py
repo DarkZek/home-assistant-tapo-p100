@@ -260,9 +260,11 @@ class TriggerEvent(CoordinatedTapoEntity, EventEntity):
                     elif isinstance(event, RotationEvent) and response.events[0].degrees >= 0:
                         self._trigger_event(TriggerEventTypes.ROTATE_CLOCKWISE)
                         _LOGGER.info('rotate_clockwise')
+                        # I can access event.degrees here I just don't know how to expose it to HA to use in automations
                     elif isinstance(event, RotationEvent) and response.events[0].degrees < 0:
                         self._trigger_event(TriggerEventTypes.ROTATE_ANTICLOCKWISE)
                         _LOGGER.info('rotate_anticlockwise')
+                        # I can access event.degrees here I just don't know how to expose it to HA to use in automations
 
                 self.async_write_ha_state()
                 self._last_event_id = response.events[0].id
