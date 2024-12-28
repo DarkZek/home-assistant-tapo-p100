@@ -242,10 +242,7 @@ class TriggerEvent(CoordinatedTapoEntity, EventEntity):
                 self._last_event_id = response.events[0].id
             elif not self._last_event_id is None and self._last_event_id != response.events[0].id:
                 # There's more events to pump. Pump from back to front (oldest to newest)
-                events_len = len(response.events)
-
-                for i in range(events_len - 1, -1, -1):
-                    event = response.events[i]
+                for event in reversed(response.events):
                     
                     # If already processed, skip
                     if event.id <= self._last_event_id:
@@ -253,17 +250,13 @@ class TriggerEvent(CoordinatedTapoEntity, EventEntity):
 
                     if isinstance(event, SingleClickEvent):
                         self._trigger_event(TriggerEventTypes.SINGLE_PRESS)
-                        _LOGGER.info('single_press')
                     elif isinstance(event, DoubleClickEvent):
                         self._trigger_event(TriggerEventTypes.DOUBLE_PRESS)
-                        _LOGGER.info('double_press')
                     elif isinstance(event, RotationEvent) and event.degrees >= 0:
-                        self._trigger_event(TriggerEventTypes.ROTATE_CLOCKWISE)
-                        _LOGGER.info(f'rotate_clockwise {event.degrees}')
+                        self._trigger_event(TriggerEventTypes.ROTATE_CLOCKWISE, { 'degrees': event.degrees })
                         # I can access event.degrees here I just don't know how to expose it to HA to use in automations
                     elif isinstance(event, RotationEvent) and event.degrees < 0:
-                        self._trigger_event(TriggerEventTypes.ROTATE_ANTICLOCKWISE)
-                        _LOGGER.info(f'rotate_anticlockwise {event.degrees}')
+                        self._trigger_event(TriggerEventTypes.ROTATE_ANTICLOCKWISE, { 'degrees': event.degrees })
                         # I can access event.degrees here I just don't know how to expose it to HA to use in automations
 
                 self.async_write_ha_state()
