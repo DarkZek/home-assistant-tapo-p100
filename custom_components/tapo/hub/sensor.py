@@ -234,9 +234,7 @@ class TriggerEvent(CoordinatedTapoEntity, EventEntity):
 
     async def event_loop(self):
         while True:
-            # Just request 1 event at a time. This is simple and may result in lost events however.
-            # TODO: A better approach may be to cache the last n IDs and try to submit all missing events in order.
-            maybe_response = await self.device.get_component(TriggerLogComponent).get_event_logs(1)
+            maybe_response = await self.device.get_component(TriggerLogComponent).get_event_logs(10)
             _LOGGER.info(maybe_response)
             response = maybe_response.get_or_else(TriggerLogResponse(0, 0, []))
 
@@ -244,14 +242,28 @@ class TriggerEvent(CoordinatedTapoEntity, EventEntity):
                 # Skip the first event on startup to avoid re-reporting of historical events.
                 self._last_event_id = response.events[0].id
             elif not self._last_event_id is None and self._last_event_id != response.events[0].id:
-                if isinstance(response.events[0], SingleClickEvent):
-                    self._trigger_event(TriggerEventTypes.SINGLE_PRESS)
-                elif isinstance(response.events[0], DoubleClickEvent):
-                    self._trigger_event(TriggerEventTypes.DOUBLE_PRESS)
-                elif isinstance(response.events[0], RotationEvent) and response.events[0].degrees >= 0:
-                    self._trigger_event(TriggerEventTypes.ROTATE_CLOCKWISE)
-                elif isinstance(response.events[0], RotationEvent) and response.events[0].degrees < 0:
-                    self._trigger_event(TriggerEventTypes.ROTATE_ANTICLOCKWISE)
+                # There's more events to pump. Pump from back to front (oldest to newest)
+                events_index = len(response.events)
+
+                for i in range(events_index, 0):
+                    event = response.events[i]
+                    
+                    # If already processed, skip
+                    if event.id < self._last_event_id:
+                        continue
+
+                    if isinstance(event, SingleClickEvent):
+                        self._trigger_event(TriggerEventTypes.SINGLE_PRESS)
+                        _LOGGER.info('single_press')
+                    elif isinstance(event, DoubleClickEvent):
+                        self._trigger_event(TriggerEventTypes.DOUBLE_PRESS)
+                        _LOGGER.info('double_press')
+                    elif isinstance(event, RotationEvent) and response.events[0].degrees >= 0:
+                        self._trigger_event(TriggerEventTypes.ROTATE_CLOCKWISE)
+                        _LOGGER.info('rotate_clockwise')
+                    elif isinstance(event, RotationEvent) and response.events[0].degrees < 0:
+                        self._trigger_event(TriggerEventTypes.ROTATE_ANTICLOCKWISE)
+                        _LOGGER.info('rotate_anticlockwise')
 
                 self.async_write_ha_state()
                 self._last_event_id = response.events[0].id
