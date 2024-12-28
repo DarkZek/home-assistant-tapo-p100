@@ -236,6 +236,9 @@ class TriggerEvent(CoordinatedTapoEntity, EventEntity):
         while True:
             maybe_response = await self.device.get_component(TriggerLogComponent).get_event_logs(10)
             response = maybe_response.get_or_else(TriggerLogResponse(0, 0, []))
+            _LOGGER.info(self._last_event_id)
+            _LOGGER.info(response.events[0].id)
+            _LOGGER.info('d')
 
             if self._last_event_id is None and len(response.events) > 0:
                 # Skip the first event on startup to avoid re-reporting of historical events.
