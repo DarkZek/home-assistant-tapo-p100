@@ -249,7 +249,7 @@ class TriggerEvent(CoordinatedTapoEntity, EventEntity):
                 _LOGGER.info(events_len)
 
                 for i in range(events_len, -1, -1):
-                    _LOGGER.info('start looping')
+                    _LOGGER.info('start looping22')
                     _LOGGER.info(response.events)
                     _LOGGER.info(i)
                     event = response.events[i]
