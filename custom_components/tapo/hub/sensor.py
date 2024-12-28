@@ -244,11 +244,11 @@ class TriggerEvent(CoordinatedTapoEntity, EventEntity):
                 # There's more events to pump. Pump from back to front (oldest to newest)
                 events_index = len(response.events)
 
-                for i in range(events_index, 0):
+                for i in range(events_index, 0, -1):
                     event = response.events[i]
                     
                     # If already processed, skip
-                    if event.id < self._last_event_id:
+                    if event.id <= self._last_event_id:
                         continue
 
                     if isinstance(event, SingleClickEvent):
