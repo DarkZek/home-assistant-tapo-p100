@@ -249,12 +249,9 @@ class TriggerEvent(CoordinatedTapoEntity, EventEntity):
                 _LOGGER.info(events_len)
 
                 for i in range(events_len - 1, -1, -1):
-                    _LOGGER.info('start looping22')
-                    _LOGGER.info(response.events)
-                    _LOGGER.info(i)
+                    _LOGGER.info(f'start looping {i}')
                     event = response.events[i]
-                    _LOGGER.info('event')
-                    _LOGGER.info(event)
+                    _LOGGER.info(type(event))
                     
                     # If already processed, skip
                     if event.id <= self._last_event_id:
